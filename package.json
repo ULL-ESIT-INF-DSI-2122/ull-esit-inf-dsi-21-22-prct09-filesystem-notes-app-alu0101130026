@@ -1,0 +1,17 @@
+{
+  "name": "practica9",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "coverage": "nyc npm test && nyc report --reporter-text-lcov | coveralls && rm -rf .nyc_output"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "coveralls": "^3.1.1",
+    "nyc": "^15.1.0"
+  }
+}
