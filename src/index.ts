@@ -1,75 +1,195 @@
-/**
- * Clase que implementa el filter de Typescript.
- */
-type Numbers = {
-    decisionVariables: number[];
-    evaluate: () => void;
-  }
-  
+import  * as yargs from "yargs";
+import {NoteList} from "./note_list"
+import {User} from "./user"
+import { Note} from "./note";
 
-abstract class filter {
-    protected list: Numbers[];
-  
-    constructor(
-        protected lista: number[],
-        protected maxNumber: number) {
-      this.list = [];
-    }
-
-    public run() {
-        // Population initialisation
-        this.initList();
-        // Hook
-        this.afterInitialisation();
-        // Initial population evaluation
-        this.evaluateList();
-        // Hook
-        this.afterEvaluation();
-
-        let currentNumberGenerations = 0;
-        while (currentNumberGenerations < this.maxNumber) {
-            // Generates the children
-             const childPopulation = this.generateAndEvaluateChildList();
-            // Hook
-             this.afterChildrenGeneration();
-            // Selects the fittest individuals from among parents and children
-            this.list = this.selectFromParentsAndChildren(childList);
-            // Hook
-            this.afterSurvivorSelection();
-            // New generation performed
-            currentNumberGenerations++;
+yargs.command({
+  command: 'add',
+  describe: 'Add a new note',
+  builder: {
+      user: {
+        describe: 'List owner',
+        demand: true,
+        alias: 'u',
+        type: "string"
+      },
+      title: {
+          describe: 'Note title',
+          demand: true,
+          alias: 't',
+          type: "string"
+      },
+      body: {
+          describe: 'Note body',
+          demand: false,
+          alias: 'b',
+          type: "string"
+      },
+      color: {
+          describe: 'Note color',
+          demand: false,
+          alias: 'c'
+      }
+  },
+  handler(argv) {
+    if ( typeof argv.user === 'string' 
+         && typeof argv.title === 'string') {
+        const noteList = new NoteList(new User(argv.user));
+        if (typeof argv.body === 'string') {
+          if (typeof argv.color === 'string') {
+            noteList.addNote(new Note(argv.title, argv.body, argv.color));
+          } else {
+            noteList.addNote(new Note(argv.title, argv.body));
+          }
+        } else {
+          noteList.addNote(new Note(argv.title));
         }
     }
+  },
+});
+
+yargs.command({
+  command: 'modify',
+  describe: 'modify note content',
+  builder: {
+      user: {
+        describe: 'List owner',
+        demand: true,
+        alias: 'u',
+        type: "string"
+      },
+      title: {
+          describe: 'Note title',
+          demand: true,
+          alias: 't',
+          type: "string"
+      },
+      body: {
+          describe: 'Note body',
+          demand: false,
+          alias: 'b',
+          type: "string"
+      }
+  },
+  handler(argv) {
+    if ( typeof argv.user === 'string' 
+         && typeof argv.title === 'string') {
+        const noteList = new NoteList(new User(argv.user));
+     
+          if (typeof argv.body === 'string') {
+            noteList.modNote(argv.title, argv.body);
+          } 
+           
+    }
+  },
+});
 
 
-protected evaluatePopulation() {
-    console.log('Template: evaluating list');
-    this.list.forEach((list) => {
-      list.evaluate();
-    });
-  }
+yargs.command({
+  command: 'append',
+  describe: 'append to note content',
+  builder: {
+      user: {
+        describe: 'List owner',
+        demand: true,
+        alias: 'u',
+        type: "string"
+      },
+      title: {
+          describe: 'Note title',
+          demand: true,
+          alias: 't',
+          type: "string"
+      },
+      body: {
+          describe: 'Note body',
+          demand: false,
+          alias: 'b',
+          type: "string"
+      }
+  },
+  handler(argv) {
+    if ( typeof argv.user === 'string' 
+         && typeof argv.title === 'string') {
+        const noteList = new NoteList(new User(argv.user));
+        if (typeof argv.body === 'string') {
+            noteList.appendNote(argv.title, argv.body);
+        }       
+    }
+  },
+});
 
-  protected generateAndEvaluateChildPopulation() {
-    console.log('Template: generating children');
+yargs.command({
+  command: 'remove',
+  describe: 'remove a note',
+  builder: {
+      user: {
+        describe: 'List owner',
+        demand: true,
+        alias: 'u',
+        type: "string"
+      },
+      title: {
+          describe: 'Note title',
+          demand: true,
+          alias: 't',
+          type: "string"
+      }
+  },
+  handler(argv) {
+    if ( typeof argv.user === 'string' 
+         && typeof argv.title === 'string') {
+        const noteList = new NoteList(new User(argv.user));
+         noteList.rmNote(argv.title);
+    }
+  },
+});
 
-    const childList: Number[] = [];
 
-    this.list.forEach((list) => {
-      const otherIndividual =
-        this.list[Math.floor(Math.random() * this.list.length)];
+yargs.command({
+  command: 'read',
+  describe: 'read a single note',
+  builder: {
+      user: {
+        describe: 'List owner',
+        demand: true,
+        alias: 'u',
+        type: "string"
+      },
+      title: {
+          describe: 'Note title',
+          demand: true,
+          alias: 't',
+          type: "string"
+      }
+  },
+  handler(argv) {
+    if ( typeof argv.user === 'string' 
+         && typeof argv.title === 'string') {
+        const noteList = new NoteList(new User(argv.user));
+        noteList.readNote(argv.title);
+        
+    }
+  },
+});
 
-      const [newIndividual, otherNewIndividual] =
-        this.crossover(individual, otherIndividual, this.crossoverRate);
+yargs.command({
+  command: 'show',
+  describe: 'list all notes',
+  builder: {
+      user: {
+        describe: 'List owner',
+        demand: true,
+        alias: 'u',
+        type: "string"
+      }
+  },
+  handler(argv) {
+    if ( typeof argv.user === 'string') {
+        const noteList = new NoteList(new User(argv.user));
+         noteList.showNotes();
+    }
+  },
+});
 
-      this.mutation(newIndividual, this.mutationRate);
-      this.mutation(otherNewIndividual, this.mutationRate);
-
-      newIndividual.evaluate();
-      otherNewIndividual.evaluate();
-
-      childPopulation.push(newIndividual, otherNewIndividual);
-    });
-
-    return childPopulation;
-  }
-}
+yargs.parse();
